@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>To-Do List</title>
+      <style>
+         @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Questrial&family=Rampart+One&display=swap');
+         *
+         {
+         font-family: 'Questrial' !important;
+         }
+      </style>
+      <style>
+        .modal-content {
+          border-radius: 10px;
+        }
+        .modal-header {
+          background-color: #f8f9fa;
+        }
+        .modal-footer {
+          background-color: #f8f9fa;
+        }
+      </style>
+      <style>
+        :root {
+            --bg-light: #f8f9fa;
+            --bg-dark: #212529;
+            --text-light: #ffffff;
+            --text-dark: #000000;
+        }
+    
+        body.light-mode {
+            background-color: var(--bg-light) !important;
+            color: var(--text-dark);
+        }
+    
+        body.dark-mode {
+            background-color: var(--bg-dark) !important;
+            color: var(--text-light);
+        }
+    
+        .dark-mode .btn-outline-dark {
+            border-color: var(--text-light);
+            color: var(--text-light);
+        }
+    
+        .dark-mode .btn-outline-dark:hover {
+            background-color: var(--text-light);
+            color: var(--bg-dark);
+        }
+    
+        .dark-mode .form-control {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            border-color: var(--text-light);
+        }
+    
+        .dark-mode .form-control:focus {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            border-color: var(--text-light);
+        }
+
+        .dark-mode .form-control::placeholder {
+            color: var(--text-light);
+        }
+    
+        .dark-mode .nav-tabs .nav-link {
+            color: var(--text-light);
+        }
+    
+        .dark-mode .nav-tabs .nav-link.active {
+            background-color: var(--text-light);
+            color: var(--bg-dark);
+        }
+
+        .dark-mode .list-group-item
+        {
+            background-color: var(--bg-dark) !important;
+            color: var(--text-light);
+        }
+    
+        .dark-mode .modal-content {
+            background-color: var(--bg-dark) !important;
+            color: var(--text-light);
+        }
+
+        .dark-mode .modal-header {
+            background-color: var(--bg-dark) !important;
+            color: var(--text-light);
+        }
+
+        .dark-mode .btn-close 
+        {
+
+            filter: invert(1);
+        
+        }
+
+        .dark-mode #toggle-value-btn
+        {
+            border: solid 1px var(--bg-light) !important;
+        }
+
+        .dark-mode #toggle-value-btn::placeholder
+        {
+            color:var(--bg-light) !important;
+        }
+
+        .list-group-item
+        {
+            align-items: center;
+        }
+
+
+        @media(max-width:768px)
+        {
+            .list-group-item
+            {
+                flex-direction: column !important;
+                gap: .5rem;
+                align-items: start !important;
+            }
+
+            .input-group
+            {
+                flex-direction: column !important;
+                
+            }
+            .input-group input 
+            {
+                width: 100% !important;
+            }
+        }
+    </style>
+      
+      <!-- Importando o Bootstrap -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+   </head>
+   <body class="bg-light">
+    <div class="d-flex mt-4 justify-content-end me-3">
+        <button class="btn btn-outline-dark" id="toggle-mode-btn" onclick="toggleMode()">Dark Mode</button>
+    </div>
+      <div class="container mt-5">
+         <h1 class="text-center mb-4">To-Do List</h1>
+         <!-- Abas para alternar entre Ganhos e Gastos -->
+         <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <button class="nav-link active" id="tab-gains" onclick="showTab('gains')">Ganhos</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="tab-expenses" onclick="showTab('expenses')">Gastos</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="tab-completed" onclick="showTab('completed')">Concluídas</button>
+            </li>
+        </ul>
+        
+         <!-- Formulário para adicionar tarefas -->
+         <div class="input-group mt-3">
+            <input type="text" style="width:40%" class="form-control" id="new-task" placeholder="Digite uma nova tarefa...">
+            <input type="date" style="width:20%" class="form-control" id="due-date" placeholder="Data meta">
+            <input type="number" style="width:20%" class="form-control" id="task-value" placeholder="Valor (R$)">
+            <button class="btn btn-outline-secondary" id="toggle-value-btn" onclick="toggleValueInput()">Sem Valor</button>
+            <button class="btn btn-primary" onclick="addTask()">Adicionar</button>
+         </div>
+         <!-- Lista de Tarefas -->
+         <ul id="task-list-gains" class="list-group mt-3"></ul>
+         <ul id="task-list-expenses" class="list-group mt-3 d-none"></ul>
+         <ul id="task-list-completed" class="list-group mt-3 d-none"></ul>
+
+         <!-- Exibição de Ganhos -->
+         <div class="mt-4" id="earnings-display">
+            <div><strong>Ganhos Totais:</strong> R$ 0,00</div>
+            <div><strong>Gastos Totais:</strong> R$ 0,00</div>
+         </div>
+      </div>
+
+<!-- Modal para Editar Tarefa -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editTaskModalLabel">Editar Tarefa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-task-form">
+            <div class="mb-3">
+              <label for="edit-task-text" class="form-label">Descrição</label>
+              <input type="text" class="form-control" id="edit-task-text" placeholder="Descrição da tarefa">
+            </div>
+            <div class="mb-3">
+              <label for="edit-due-date" class="form-label">Data Meta</label>
+              <input type="date" class="form-control" id="edit-due-date">
+            </div>
+            <div class="mb-3">
+              <label for="edit-task-value" class="form-label">Valor (R$)</label>
+              <input type="number" class="form-control" id="edit-task-value" placeholder="Valor">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="save-task-btn">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+      <!-- Scripts do Bootstrap -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+      <!-- Script Principal -->
+      <script>
+         let currentTab = 'gains'; // Aba inicial
+         
+         function toggleValueInput() {
+             const valueInput = document.getElementById('task-value');
+             const toggleButton = document.getElementById('toggle-value-btn');
+         
+             if (valueInput.style.display === 'none') {
+                 valueInput.style.display = '';
+                 toggleButton.textContent = 'Sem Valor';
+                 valueInput.value = ''; // Limpar qualquer valor atribuído anteriormente
+             } else {
+                 valueInput.style.display = 'none';
+                 toggleButton.textContent = 'Atribuir Valor';
+             }
+         }
+         
+         function showTab(tab) {
+    currentTab = tab;
+
+    document.getElementById('task-list-gains').classList.add('d-none');
+    document.getElementById('task-list-expenses').classList.add('d-none');
+    document.getElementById('task-list-completed').classList.add('d-none');
+
+    document.getElementById('tab-gains').classList.remove('active');
+    document.getElementById('tab-expenses').classList.remove('active');
+    document.getElementById('tab-completed').classList.remove('active');
+
+    if (tab === 'gains') {
+        document.getElementById('task-list-gains').classList.remove('d-none');
+        document.getElementById('tab-gains').classList.add('active');
+        loadTasks(); // Carregar ganhos e gastos
+    } else if (tab === 'expenses') {
+        document.getElementById('task-list-expenses').classList.remove('d-none');
+        document.getElementById('tab-expenses').classList.add('active');
+        loadTasks(); // Carregar ganhos e gastos
+    } else if (tab === 'completed') {
+        document.getElementById('task-list-completed').classList.remove('d-none');
+        document.getElementById('tab-completed').classList.add('active');
+        loadCompletedTasks(); // Carregar tarefas concluídas
+    }
+}
+
+
+         
+         document.addEventListener('DOMContentLoaded', () => {
+             loadTasks();
+             loadEarnings();
+         });
+         
+         function loadTasks() {
+    fetch('http://localhost:3000/tasks')
+        .then(response => response.json())
+        .then(tasks => {
+            const taskListGains = document.getElementById('task-list-gains');
+            const taskListExpenses = document.getElementById('task-list-expenses');
+            taskListGains.innerHTML = '';
+            taskListExpenses.innerHTML = '';
+
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item', 'd-flex', 'justify-content-between');
+                li.innerHTML = `
+                <div>
+                    <strong>${task.text}</strong>
+                    <br>
+                    <small>Meta: ${formatDate(task.dueDate)}</small>
+                    <br>
+                    <small>Valor: ${formatValue(task.value)}</small>
+                </div>
+                <div>
+                    <button class="btn btn-success btn-sm me-2" onclick="completeTask(${task.id})">Concluir</button>
+                    <button class="btn btn-primary btn-sm me-2" onclick="editTask(${task.id})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">Excluir</button>
+                </div>`;
+                if (task.value >= 0) {
+                    taskListGains.appendChild(li);
+                } else {
+                    taskListExpenses.appendChild(li);
+                }
+            });
+        })
+        .catch(err => console.error('Erro ao carregar tarefas:', err));
+}
+
+function loadCompletedTasks() {
+    fetch('http://localhost:3000/tasks/completed')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao buscar tarefas concluídas.');
+            }
+            return response.json();
+        })
+        .then(tasks => {
+            const completedTasksList = document.getElementById('task-list-completed');
+            completedTasksList.innerHTML = ''; // Limpar lista antes de carregar
+
+            if (tasks.length === 0) {
+                completedTasksList.innerHTML = '<li class="list-group-item text-center">Nenhuma tarefa concluída.</li>';
+                return;
+            }
+
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item', 'd-flex', 'justify-content-between');
+                li.innerHTML = `
+                <div>
+                    <strong>${task.text}</strong>
+                    <br>
+                    <small>Meta: ${formatDate(task.dueDate)}</small>
+                    <br>
+                    <small>Valor: ${formatValue(task.value)}</small>
+                </div>
+                <div>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">Excluir</button>
+                </div>`;
+                completedTasksList.appendChild(li);
+            });
+        })
+        .catch(err => {
+            console.error('Erro:', err.message);
+            alert('Não foi possível carregar as tarefas concluídas.');
+        });
+}
+
+
+
+
+         
+function editTask(id) {
+    fetch(`http://localhost:3000/tasks/${id}`)
+        .then(response => response.json())
+        .then(task => {
+            // Preencher os campos do modal com os valores da tarefa
+            document.getElementById('edit-task-text').value = task.text;
+
+            // Formatar a data para o formato esperado pelo input date (yyyy-MM-dd)
+            const formattedDate = task.dueDate
+                ? new Date(task.dueDate).toISOString().split('T')[0]
+                : '';
+            document.getElementById('edit-due-date').value = formattedDate;
+
+            document.getElementById('edit-task-value').value = task.value;
+
+            // Adicionar evento ao botão de salvar
+            const saveButton = document.getElementById('save-task-btn');
+            saveButton.onclick = () => saveTask(id);
+
+            // Abrir o modal
+            const editModal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+            editModal.show();
+        })
+        .catch(err => alert('Erro ao carregar a tarefa para edição:', err));
+}
+
+
+
+
+         
+         function formatDate(date) {
+             if (!date) return 'Não definida';
+             const adjustedDate = new Date(date);
+             adjustedDate.setMinutes(adjustedDate.getMinutes() + adjustedDate.getTimezoneOffset());
+             const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+             return adjustedDate.toLocaleDateString('pt-BR', options);
+         }
+         
+         function formatValue(value) {
+             if (!value) return 'Sem preço';
+             return `R$ ${Math.abs(parseFloat(value)).toFixed(2).replace('.', ',')}`;
+         }
+         
+         function addTask() {
+             const taskText = document.getElementById('new-task').value;
+             const dueDate = document.getElementById('due-date').value;
+             const taskValue = document.getElementById('task-value').value;
+         
+             if (!taskText) {
+                 alert('Digite uma tarefa!');
+                 return;
+             }
+         
+             const newTask = { text: taskText, dueDate, value: currentTab === 'gains' ? taskValue : -Math.abs(taskValue) };
+         
+             fetch('http://localhost:3000/tasks', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify(newTask),
+             })
+             .then(response => {
+                 if (!response.ok) {
+                     return response.json().then(err => {
+                         throw new Error(err.error || 'Erro ao adicionar a tarefa.');
+                     });
+                 }
+                 return response.json();
+             })
+             .then(() => {
+                 loadTasks();
+                 document.getElementById('new-task').value = '';
+                 document.getElementById('due-date').value = '';
+                 document.getElementById('task-value').value = '';
+             })
+             .catch(err => alert(err.message));
+         }
+         
+    function saveTask(id) {
+    const taskText = document.getElementById('edit-task-text').value;
+    const dueDate = document.getElementById('edit-due-date').value;
+    const taskValue = document.getElementById('edit-task-value').value;
+
+    if (!taskText || !dueDate || taskValue === '') {
+        alert('Todos os campos devem ser preenchidos!');
+        return;
+    }
+
+    const updatedTask = { text: taskText, dueDate, value: parseFloat(taskValue) };
+
+    fetch(`http://localhost:3000/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTask),
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.error || 'Erro ao atualizar a tarefa.');
+                });
+            }
+            return response.json();
+        })
+        .then(() => {
+            loadTasks();
+
+            // Fechar o modal
+            const editModal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+            editModal.hide();
+        })
+        .catch(err => alert(err.message));
+}
+
+
+         
+         function deleteTask(id) {
+             fetch(`http://localhost:3000/tasks/${id}`, {
+                 method: 'DELETE',
+             })
+             .then(() => loadTasks());
+         }
+         
+         function completeTask(id) {
+             fetch(`http://localhost:3000/tasks/${id}/complete`, {
+                 method: 'POST',
+             })
+             .then(() => {
+                 loadTasks();
+                 loadEarnings();
+             });
+         }
+         
+         function loadEarnings() {
+             fetch('http://localhost:3000/earnings')
+                 .then(response => response.json())
+                 .then(earnings => {
+                     const earningsDisplay = document.getElementById('earnings-display');
+                     earningsDisplay.innerHTML = `
+                         <div><strong>Ganhos Totais:</strong> R$ ${earnings.totalEarnings.replace('.', ',')}</div>
+                         <div class="mb-4"><strong>Gastos Totais:</strong> R$ ${Math.abs(earnings.totalExpenses || 0).toFixed(2).replace('.', ',')}</div>
+                     `;
+                 });
+         }
+         
+         function resetForm() {
+         document.getElementById('new-task').value = '';
+         document.getElementById('due-date').value = '';
+         document.getElementById('task-value').value = '';
+         
+         const addButton = document.querySelector('button[onclick^="saveTask"]');
+         addButton.textContent = 'Adicionar';
+         addButton.setAttribute('onclick', 'addTask()');
+         }
+
+         function toggleMode() {
+    const body = document.body;
+    const modeButton = document.getElementById('toggle-mode-btn');
+
+    // Alternar entre os modos claro e escuro
+    if (body.classList.contains('light-mode')) {
+        body.classList.remove('light-mode');
+        body.classList.add('dark-mode');
+        modeButton.textContent = 'Light Mode';
+        modeButton.classList.remove('btn-outline-dark');
+        modeButton.classList.add('btn-outline-light');
+    } else {
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
+        modeButton.textContent = 'Dark Mode';
+        modeButton.classList.remove('btn-outline-light');
+        modeButton.classList.add('btn-outline-dark');
+    }
+
+    // Salvar a preferência do usuário no localStorage
+    localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+
+// Aplicar o tema salvo ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.add(savedTheme + '-mode');
+
+    const modeButton = document.getElementById('toggle-mode-btn');
+    if (savedTheme === 'dark') {
+        modeButton.textContent = 'Light Mode';
+        modeButton.classList.remove('btn-outline-dark');
+        modeButton.classList.add('btn-outline-light');
+    }
+});
+      </script>
+   </body>
+</html>
