@@ -1,8 +1,16 @@
 const db = require('./database');
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
+const cors = require('cors');
 
+// Configurar CORS para permitir o acesso do frontend
+const corsOptions = {
+    origin: ['http://147.93.8.232:3000'], // Substitua pelo seu domínio ou IP público
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
+};
+
+app.use(cors(corsOptions));
 const app = express();
 const port = 3000;
 
