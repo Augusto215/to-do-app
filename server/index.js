@@ -1,12 +1,21 @@
 const db = require('./database');
 const express = require('express');
-const cors = require('cors'); // Importa o pacote cors
+const cors = require('cors');
+const path = require('path');
+
 const app = express();
 const port = 3000;
 
-app.use(cors()); // Habilita o CORS para todas as rotas
+app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+
+// Configurar o Express para servir arquivos estáticos da pasta "public"
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Rota principal para servir o index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.get('/earnings', (req, res) => {
     db.query(
